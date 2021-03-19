@@ -1,36 +1,47 @@
-import 'reflect-metadata'
 import { PrismaClient } from '@prisma/client'
 import { ApolloServer } from 'apollo-server-micro'
 import {
-  ObjectType,
-  ID,
-  buildSchemaSync,
-  Resolver,
-  Query,
-  Field,
-} from 'type-graphql'
+  queryType,
+  objectType,
+  makeSchema,
+  mutationField,
+  nonNull,
+  stringArg,
+} from '@nexus/schema'
 
 const prisma = new PrismaClient()
-@ObjectType()
-class User {
-  @Field(() => ID)
-  id: number
 
-  // Doc: Field 修饰函数里必须声明返回的类型，不然报错，官方文档里的代码有问题 
-  @Field(() => String) 
-  name: string
-}
+const User = objectType({
+  name: 'User',
+  definition(t) {
+    t.int('id')
+    t.string('name')
+  },
+})
+const Query = queryType({
+  definition(t) {
+    t.list.field('allUsers', {
+      type: 'User',
+      description: '查询所有的用户',
+      resolve: async () => await prisma.user.findMany(),
+    })
+  },
+})
 
-@Resolver(User)
-class UserResolver {
-  @Query(() => [User])
-  async allUsers(): Promise<User[]> {
-    const users = await prisma.user.findMany()
-    return users
-  }
-}
+const createUser = mutationField('createUser', {
+  type: 'User',
+  args: {
+    name: nonNull(stringArg()),
+  },
+  async resolve(_, args) {
+    const user = await prisma.user.create({ data: { name: args.name } })
+    return user
+  },
+})
 
-const schema = buildSchemaSync({ resolvers: [UserResolver] })
+const schema = makeSchema({
+  types: [User, Query, createUser],
+})
 
 const server = new ApolloServer({
   schema,
