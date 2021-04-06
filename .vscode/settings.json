@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["POSTGRESPWD", "datasource", "typegen", "unfetch", "urql"]
+  "cSpell.words": [
+    "POSTGRESPWD",
+    "datasource",
+    "localtime",
+    "luxon",
+    "typegen",
+    "unfetch",
+    "urql"
+  ]
 }

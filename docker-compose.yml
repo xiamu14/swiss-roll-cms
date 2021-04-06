@@ -3,11 +3,13 @@ version: '3.1'
 services:
   db:
     image: postgres:11.7
-    container_name: prisma-next-nexus-postgre
+    container_name: swiss-roll-cms
     # restart: always
     environment:
       POSTGRES_USER: prismaNext
       POSTGRES_PASSWORD: ${POSTGRESPWD}
+      TZ: 'Asia/Shanghai'
+      PGTZ: 'Asia/Shanghai'
     ports:
       - 54333:5432
     volumes:
